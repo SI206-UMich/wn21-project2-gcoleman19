@@ -29,7 +29,7 @@ def get_titles_from_search_results(filename):
         authorsList.append(item.text.strip())
     information = []
     for i in range(len(bookTitles)):
-        tup = bookInfo[i], authorsList[i]
+        tup = (bookInfo[i], authorsList[i])
         information.append(tup)
     return information
 
@@ -75,8 +75,25 @@ def get_book_summary(book_url):
     Make sure to strip() any newlines from the book title and number of pages.
     """
 
-    pass
-
+    r = requests.get(book_url)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    anchor = soup.find('h1', class_='gr-h1 gr-hh1--serif')
+    title = []
+    for ti in anchor:
+        title.append(ti.text.strip())
+    anchor2 = soup.find('div', id_='bookAuthors')
+    author = []
+    for auth in anchor2:
+        author.append(auth.text.strip())
+    anchor3 = soup.find('meta', property_='books:page_count')
+    page_count = []
+    for page in anchor3:
+        page_count.append(page.text.strip())
+    summary = []
+    for i in range(len(title)):
+        tup = (title[i], author[i], page_count[i])
+        summary.append(tup)
+    return summary
 
 def summarize_best_books(filepath):
     """
@@ -137,11 +154,11 @@ class TestCases(unittest.TestCase):
         self.assertIsInstance(search_urls, list)
         # check that each item in the list is a tuple
         for x in search_urls:
-            self.assertIsInstance(type(x), tuple)
+            self.assertIsInstance(x, tuple)
         # check that the first book and author tuple is correct (open search_results.htm and find it)
-            self.assertEqual(x[0], "Harry Potter and the Deathly Hallows (Harry Potter, #7)", "J.K. Rowling")
+        self.assertEqual(search_urls[0], ('Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'))
         # check that the last title is correct (open search_results.htm and find it)
-            self.assertEqual(x[-1][0], "Harry Potter: The Prequel (Harry Potter, #0.5")
+        self.assertEqual(search_urls[-1][0], 'Harry Potter: The Prequel (Harry Potter, #0.5)')
 
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
@@ -159,7 +176,8 @@ class TestCases(unittest.TestCase):
     def test_get_book_summary(self):
         # create a local variable – summaries – a list containing the results from get_book_summary()
         # for each URL in TestCases.search_urls (should be a list of tuples)
-        summaries = get_book_summary()
+        search_urls = get_search_links()
+        summaries = get_book_summary(search_urls)
         # check that the number of book summaries is correct (10)
         self.assertEqual(len(summaries), 10)
             # check that each item in the list is a tuple
