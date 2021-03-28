@@ -6,7 +6,6 @@ import csv
 import unittest
 #worked with: Zita Jameson, Giselle Ciulla, Blair Fields, Savy Dardashti
 
-
 def get_titles_from_search_results(filename):
     """
     Write a function that creates a BeautifulSoup object on "search_results.htm". Parse
@@ -24,10 +23,12 @@ def get_titles_from_search_results(filename):
     bookInfo = []
     for tag in bookTitles:
         bookInfo.append(tag.text.strip())
+
     authorsList = []
     authorTags = soup.find_all('div', class_='authorName__container')
     for item in authorTags:
         authorsList.append(item.text.strip())
+
     information = []
     for i in range(len(bookTitles)):
         tup = (bookInfo[i], authorsList[i])
@@ -75,22 +76,26 @@ def get_book_summary(book_url):
     You can easily capture CSS selectors with your browser's inspector window.
     Make sure to strip() any newlines from the book title and number of pages.
     """
-
+    
     summary = []
-    r = requests.get(book_url)
+    r = requests.get([url for url in book_url])
     soup = BeautifulSoup(r.text, 'html.parser')
+
     title = []
-    anchor = soup.find('h1', class_='gr-h1 gr-hh1--serif')
+    anchor = soup.find('h1', class_='gr-h1 gr-h1--serif')
     for ti in anchor:
         title.append(ti.text.strip())
+
     author = []
     anchor2 = soup.find('div', id_='bookAuthors')
     for auth in anchor2:
         author.append(auth.text.strip())
+
     page_count = []
     anchor3 = soup.find('meta', property_='books:page_count')
     for page in anchor3:
         page_count.append(page.text.strip())
+
     for i in range(len(title)):
         tup = (title[i], author[i], page_count[i])
         summary.append(tup)
@@ -136,7 +141,6 @@ def summarize_best_books(filepath):
     return tups
 
 
-
 def write_csv(data, filename):
     """
     Write a function that takes in a list of tuples (called data, i.e. the
@@ -157,8 +161,11 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
-    pass
-
+    with open(filename, 'w', newline='', encoding='utf-8') as f:
+        f = csv.writer(f, delimiter = ',')
+        f.writerow(['Book title','Author Name'])
+        for line in data:
+            f.writerow(line)
 
 def extra_credit(filepath):
     """
@@ -167,7 +174,23 @@ def extra_credit(filepath):
     Please see the instructions document for more information on how to complete this function.
     You do not have to write test cases for this function.
     """
-    pass
+    file1 = open(filepath, 'r')
+    data = file1.read()
+    file1.close()
+
+    reg_exp = r'([A-Z]{1}.+ [A-Z]{1}.+)+'
+    r = requests.get(data)
+    soup = BeautifulSoup(r.text,'html.parser')
+    anchor = soup.find('meta', property='og:description')
+    description = anchor['content']
+
+    entities = []
+    for x in description:
+        entity = re.findall(reg_exp, x)
+        for i in entity:
+            entities.append(i)
+    return entities
+
 
 class TestCases(unittest.TestCase):
 
@@ -240,18 +263,26 @@ class TestCases(unittest.TestCase):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
         titles = get_titles_from_search_results('search_results.htm')
         # call write csv on the variable you saved and 'test.csv'
-        write = write_csv(titles,'test.csv')
+        write_csv(titles,'test.csv')
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
-        csv_lines = write.readlines()
+        csv_lines = []
+        with open('test.csv') as file:
+            csv_f = csv.reader(file)
+            for x in csv_f:
+                csv_lines.append(x)
+
         # check that there are 21 lines in the csv
         self.assertEqual(len(csv_lines), 21)
         # check that the header row is correct
-        for row in write:
-            self.assertEqual(row[0], "Book title,Author Name")
+        self.assertEqual(csv_lines[0], ["Book title", "Author Name"])
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
-            self.assertEqual(row[1], 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling')
+        self.assertEqual(csv_lines[1], ['Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'])
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'
-            self.assertEqual(row[-1], 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)')
+        self.assertEqual(csv_lines[-1], ['Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'])
+
+    def test_extra_credit(self):
+        ex = extra_credit('extra_credit.htm')
+        self.assertEqual(len(ex), 9)
 
 
 if __name__ == '__main__':
