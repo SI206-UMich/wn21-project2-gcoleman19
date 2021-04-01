@@ -4,7 +4,7 @@ import re
 import os
 import csv
 import unittest
-#worked with: Zita Jameson, Giselle Ciulla, Blair Fields, Savy Dardashti
+#worked with: Zita Jameson Blair Fields, Savy Dardashti
 
 def get_titles_from_search_results(filename):
     """
@@ -160,7 +160,7 @@ def extra_credit(filepath):
      data = file1.read()
      file1.close()
 
-     regex = r'([A-Z]\w*. ){2,}'
+     regex = r'\b[A-Z]\w.\w+(?:\s[A-Z]\w+)+'
      soup = BeautifulSoup(data, 'lxml')
      descriptions = soup.find('div', class_= 'readable stacked').find('span', id = 'freeText4791443123668479528').text
 
