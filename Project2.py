@@ -151,28 +151,21 @@ def write_csv(data, filename):
             f.writerow(line)
 
 def extra_credit(filepath):
-#     """
+     """
 #     EXTRA CREDIT
 #     Please see the instructions document for more information on how to complete this function.
 #     You do not have to write test cases for this function.
 #     """
-#     file1 = open(filepath, 'r')
-#     data = file1.read()
-#     file1.close()
+     file1 = open(filepath, 'r')
+     data = file1.read()
+     file1.close()
 
-#     reg_exp = r'([A-Z]{1}.+ [A-Z]{1}.+)+'
-#     r = requests.get(data)
-#     soup = BeautifulSoup(r.text,'html.parser')
-#     anchor = soup.find('meta', property='og:description')
-#     description = anchor['content']
+     regex = r'([A-Z]\w*. ){2,}'
+     soup = BeautifulSoup(data, 'lxml')
+     descriptions = soup.find('div', class_= 'readable stacked').find('span', id = 'freeText4791443123668479528').text
 
-#     entities = []
-#     for x in description:
-#         entity = re.findall(reg_exp, x)
-#         for i in entity:
-#             entities.append(i)
-#     return entities
-    pass
+     entity = re.findall(regex, descriptions)
+     return entity
 
 
 class TestCases(unittest.TestCase):
@@ -266,9 +259,9 @@ class TestCases(unittest.TestCase):
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'
         self.assertEqual(csv_lines[-1], ['Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'])
 
-    # def test_extra_credit(self):
-    #     ex = extra_credit('extra_credit.htm')
-    #     self.assertEqual(len(ex), 9)
+    def test_extra_credit(self):
+         ex = extra_credit('extra_credit.htm')
+         self.assertEqual(len(ex), 9)
 
 
 if __name__ == '__main__':
