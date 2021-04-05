@@ -4,7 +4,7 @@ import re
 import os
 import csv
 import unittest
-#worked with: Zita Jameson Blair Fields, Savy Dardashti
+#worked with: Zita Jameson, Blair Fields, Savy Dardashti
 
 def get_titles_from_search_results(filename):
     """
